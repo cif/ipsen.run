@@ -1,11 +1,12 @@
 
 
 .main {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6rem;
+  padding: 10% 3%;
   min-height: 100vh;
+  max-width: 100%;
+}
+
+.main h2 {
+  width: 98%;
 }
 
