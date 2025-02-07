@@ -8,16 +8,16 @@ function getQuarterRange(year: number, month: number) {
   const quarterStartMonth = Math.floor(month / 3) * 3;
   const quarter = Math.floor(month / 3) + 1;
   return {
-    Label: `Q${quarter}`,
-    After: new Date(year, quarterStartMonth, 1).toISOString(),
-    Before:
+    label: `Q${quarter}`,
+    after: new Date(year, quarterStartMonth, 1).toISOString(),
+    before:
       getLastDayOfMonth(year, quarterStartMonth + 2)
         .toISOString()
         .split("T")[0] + "T23:59:59.999Z",
-    Year: year,
-    Month: null,
-    Quarter: `Q${quarter}`,
-    Week: null,
+    year: year,
+    month: null,
+    quarter: `Q${quarter}`,
+    week: null,
   };
 }
 
@@ -35,16 +35,15 @@ export async function GET(request: Request) {
   // Add month range if it's the first day of the month
   if (targetDate.getDate() === 1) {
     ranges.push({
-      Label: new Date(year, month).toLocaleString("en-US", { month: "long" }),
-      After: new Date(year, month, 1).toISOString(),
-      Before:
+      label: new Date(year, month).toLocaleString("en-US", { month: "long" }),
+      after: new Date(year, month, 1).toISOString(),
+      before:
         new Date(year, month + 1, 0).toISOString().split("T")[0] +
         "T23:59:59.999Z",
-
-      Year: year,
-      Month: month + 1,
-      Quarter: null,
-      Week: null,
+      year: year,
+      month: month + 1,
+      quarter: null,
+      week: null,
     });
 
     // If it's also the first day of a quarter, add quarter range
@@ -66,13 +65,13 @@ export async function GET(request: Request) {
     weekEnd.setDate(weekEnd.getDate() + 6); // Add 6 days to get to Saturday
 
     ranges.push({
-      Label: `Week ${fiscalWeek}`,
-      After: targetDate.toISOString(),
-      Before: weekEnd.toISOString().split("T")[0] + "T23:59:59.999Z",
-      Year: year,
-      Month: null,
-      Quarter: null,
-      Week: fiscalWeek,
+      label: `Week ${fiscalWeek}`,
+      after: targetDate.toISOString(),
+      before: weekEnd.toISOString().split("T")[0] + "T23:59:59.999Z",
+      year: year,
+      month: null,
+      quarter: null,
+      week: fiscalWeek,
     });
   }
 
