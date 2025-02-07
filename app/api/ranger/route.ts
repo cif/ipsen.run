@@ -18,6 +18,7 @@ export async function GET(request: Request) {
       before: date.clone().endOf("month").toISOString(),
       year: date.year(),
       month: date.format("MMMM"),
+      numericMonth: date.month(),
       quarter: "",
     });
   }
