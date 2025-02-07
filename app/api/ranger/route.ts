@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       year: date.year(),
       month: "",
       quarter: "",
-      week: date.isoWeek(),
+      week: `FW${date.isoWeek()}`,
     });
   }
 
