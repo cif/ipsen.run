@@ -32,6 +32,7 @@ export async function GET(request: Request) {
       year: date.year(),
       month: "",
       quarter: `Q${date.quarter()}`,
+      numericQuarter: date.quarter(),
     });
   }
   // Add fiscal week range only if it's a Sunday
