@@ -1,77 +1,49 @@
 import { NextResponse } from "next/server";
-
-function getLastDayOfMonth(year: number, month: number): Date {
-  return new Date(year, month + 1, 0);
-}
-
-function getQuarterRange(year: number, month: number) {
-  const quarterStartMonth = Math.floor(month / 3) * 3;
-  const quarter = Math.floor(month / 3) + 1;
-  return {
-    label: `Q${quarter}`,
-    after: new Date(year, quarterStartMonth, 1).toISOString(),
-    before:
-      getLastDayOfMonth(year, quarterStartMonth + 2)
-        .toISOString()
-        .split("T")[0] + "T23:59:59.999Z",
-    year: year,
-    month: null,
-    quarter: `Q${quarter}`,
-    week: null,
-  };
-}
+import moment from "moment";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get("date");
 
   // Parse the date or use current date
-  const targetDate = dateParam ? new Date(dateParam) : new Date();
-  const year = targetDate.getFullYear();
-  const month = targetDate.getMonth();
-
+  const targetDate = dateParam > "" ? moment.utc(dateParam) : moment.utc();
   const ranges = [];
 
   // Add month range if it's the first day of the month
-  if (targetDate.getDate() === 1) {
+  if (targetDate.date() === 1) {
     ranges.push({
-      label: new Date(year, month).toLocaleString("en-US", { month: "long" }),
-      after: new Date(year, month, 1).toISOString(),
-      before:
-        new Date(year, month + 1, 0).toISOString().split("T")[0] +
-        "T23:59:59.999Z",
-      year: year,
-      month: month + 1,
-      quarter: null,
-      week: null,
+      label: "Month",
+      targetDate: targetDate.toISOString(),
+      after: targetDate.clone().startOf("month").toISOString(),
+      before: targetDate.clone().endOf("month").toISOString(),
+      year: targetDate.year(),
+      month: targetDate.format("MMMM"),
+      quarter: "",
     });
-
-    // If it's also the first day of a quarter, add quarter range
-    if (month % 3 === 0) {
-      ranges.push(getQuarterRange(year, month));
-    }
   }
-
-  // Add fiscal week range only if it's a Sunday
-  if (targetDate.getDay() === 0) {
-    // Calculate the fiscal week number
-    const startOfYear = new Date(year, 0, 1);
-    const days = Math.floor(
-      (targetDate.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)
-    );
-    const fiscalWeek = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-
-    const weekEnd = new Date(targetDate);
-    weekEnd.setDate(weekEnd.getDate() + 6); // Add 6 days to get to Saturday
-
+  // If it's also the first day of a quarter, add quarter range
+  if (targetDate.date() === 1 && targetDate.month() % 3 === 0) {
     ranges.push({
-      label: `Week ${fiscalWeek}`,
-      after: targetDate.toISOString(),
-      before: weekEnd.toISOString().split("T")[0] + "T23:59:59.999Z",
-      year: year,
-      month: null,
-      quarter: null,
-      week: fiscalWeek,
+      label: "Quarter",
+      targetDate: targetDate.toISOString(),
+      after: targetDate.clone().startOf("quarter").toISOString(),
+      before: targetDate.clone().endOf("quarter").toISOString(),
+      year: targetDate.year(),
+      month: "",
+      quarter: `Q${targetDate.quarter()}`,
+    });
+  }
+  // Add fiscal week range only if it's a Sunday
+  if (targetDate.day() === 0) {
+    ranges.push({
+      label: "Week",
+      targetDate: targetDate.toISOString(),
+      after: targetDate.clone().startOf("day").toISOString(),
+      before: targetDate.clone().add(6, "days").endOf("day").toISOString(),
+      year: targetDate.year(),
+      month: "",
+      quarter: "",
+      week: targetDate.isoWeek(),
     });
   }
 
